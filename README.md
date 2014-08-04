@@ -7,14 +7,13 @@ The Python interface to fetch data from Mixpanel via [Mixpanel's Data Query API]
 To install mixpanel-query-py, simply:
 
 ```
-$ sudo pip install mixpanel-query-py
+$ pip install mixpanel-query-py
 ```
 
 or alternatively (you really should be using pip though):
 
 ```
-$ sudo easy_install mixpanel-query-py
-
+$ easy_install mixpanel-query-py
 ```
 or from source:
 
