@@ -244,7 +244,10 @@ class MixpanelQueryClient(object):
         )
 
     # Event properties methods ########
-    def get_event_properties(self, event_name, property_name, filter_values, unit, interval, data_type='general', limit=255, response_format=FORMAT_JSON):
+    def get_event_properties(
+            self, event_name, property_name, filter_values, unit,
+            interval, data_type='general', limit=255,
+            response_format=FORMAT_JSON):
         """
         Get unique, total, or average data for of a single event and property
         over the last N days, weeks, or months.
@@ -328,7 +331,212 @@ class MixpanelQueryClient(object):
         )
 
     # Funnel methods ##################
+    def get_funnel_list(self, response_format=FORMAT_JSON):
+        """
+        Get the names and funnel_ids of your funnels. This method takes no parameters.
+
+        Response format:
+        [
+            {"funnel_id": 7509, "name": "Signup funnel"},
+            {"funnel_id": 9070, "name": "Funnel tutorial"}
+        ]
+        """
+        self._validate_response_format(response_format)
+        return self.connection.request(
+            'events/funnels/list',
+            {},
+            response_format=response_format
+        )
+
+    def get_funnel_detail(
+            self, funnel_id, start_date=None, end_date=None,
+            length=14, interval=1, unit=UNIT_DAY, on=None, where=None, limit=None,
+            response_format=FORMAT_JSON):
+        """
+        Get data for a specified funnel.
+
+        Response format:
+        {
+            'Signup flow': {
+                'data': {
+                    '2010-05-24': {
+                        'analysis': {
+                            'completion': 0.064679359580052493,
+                            'starting_amount': 762,
+                            'steps': 3,
+                            'worst': 2
+                        },
+                        'steps': [
+                            {
+                                'count': 762,
+                                'goal': 'pages',
+                                'overall_conv_ratio': 1.0,
+                                'step_conv_ratio': 1.0
+                            },
+                            {
+                                'count': 69,
+                                'goal': 'View signup',
+                                'overall_conv_ratio': 0.09055118110236221,
+                                'step_conv_ratio': 0.09055118110236221
+                            },
+                            {
+                                'count': 10,
+                                'goal': 'View docs',
+                                'overall_conv_ratio': 0.064679359580052493,
+                                'step_conv_ratio': 0.7142857142857143
+                            }
+                        ]
+                    },
+                    '2010-05-31': {
+                        'analysis': {
+                            'completion': 0.12362030905077263,
+                            'starting_amount': 906,
+                            'steps': 2,
+                            'worst': 2
+                        },
+                        'steps': [
+                            {
+                                'count': 906,
+                                'goal': 'homepage',
+                                'overall_conv_ratio': 1.0,
+                                'step_conv_ratio': 1.0
+                            },
+                            {
+                                'count': 112,
+                                'goal': 'View signup',
+                                'overall_conv_ratio': 0.12362030905077263,
+                                'step_conv_ratio': 0.12362030905077263
+                            }
+                        ]
+                    }
+                },
+            'meta': {'dates': ['2010-05-24', '2010-05-31']}
+            }
+        }
+        """
+        self._validate_response_format(response_format)
+        start_date_obj = self._validate_date(start_date)
+        end_date_obj = self._validate_date(end_date)
+        self._validate_expression(on, where)
+
+        # Check the actual dates
+        if start_date_obj > end_date_obj:
+            raise exceptions.InvalidDateException('The `start_date` specified after the `end_date`; you will not receive any annotations.')
+
+        return self.connection.request(
+            'events/funnels',
+            {
+                'id': funnel_id,
+                'from_date': start_date,
+                'to_date': end_date,
+                'length': length,
+                'interval': interval,
+                'unit': unit,
+                'on': on,
+                'where': where,
+            },
+            response_format=response_format
+        )
+
     # Segmentation methods ############
+    def get_segmentation(
+            self, event_name, start_date, end_date,
+            unit=UNIT_DAY, on=None, where=None, limit=None,
+            data_type=DATA_TYPE_UNIQUE, response_format=FORMAT_JSON):
+        """
+        Get data for an event, segmented and filtered by properties.
+
+        # Example 1
+        Suppose Kevin Wood has a website named guidebook.com. He has an event named
+        signed up, sent whenever a user signs up to example.com. It has a string
+        property named `mp_country_code` that stores the country code of the
+        user signing up.
+
+        > user_client.get_segmentation('signed up', '2011-08-06', ' 2011-08-16')
+        {
+            'data': {
+                'series': ['2011-08-08', '2011-08-09', '2011-08-06', '2011-08-07'],
+                'values': {
+                    'signed up': {
+                        '2011-08-06': 147,
+                        '2011-08-07': 146,
+                        '2011-08-08': 776,
+                        '2011-08-09': 1376
+                    }
+                }
+            },
+            'legend_size': 1
+        }
+
+        # Example 2
+        Suppose Kevin is impressed with the number of signups on 2011-08-09, and now
+        wants to know the top five countries his signups came from on that day. He
+        can make the following query:
+
+        > user_client.get_segmentation('signed up', '2011-08-09', ' 2011-08-09', limit=5, on='properties["mp_country_code"]')
+        {
+            'data': {
+                'series': ['2011-08-09'],
+                'values': {
+                    'CA': {'2011-08-09': 277},
+                    'FR': {'2011-08-09': 8},
+                    'GB': {'2011-08-09': 19},
+                    'IN': {'2011-08-09': 19},
+                    'US': {'2011-08-09': 1036}
+                }
+            },
+            'legend_size': 5
+        }
+
+        # Example 3
+        Kevin now wants to zero in on the US and Canada. He is tracking a property
+        named mp_keyword, which tells him the search keyword that users used to
+        get to example.com. Now he wants to determine how many signups from the US
+        and Canada came about as a result of a search that contained the word 'guidebook.'
+        He can do that with the following query:
+
+        > user_client.get_segmentation(
+            'signed up',
+            '2011-08-09',
+            '2011-08-09',
+            on='properties["mp_country_code"]',
+            where='"guidebook" in properties["mp_keyword"] and ("CA" == properties["mp_country_code"] or "US" == properties["mp_country_code"])'
+        )
+        {
+            'data': {
+                'series': ['2011-08-09'],
+                'values': {
+                    'CA': {'2011-08-09': 31},
+                    'US': {'2011-08-09': 312}
+                }
+            },
+            'legend_size': 2
+        }
+        """
+        self._validate_response_format(response_format)
+        self._validate_expression(on, where)
+        start_date_obj = self._validate_date(start_date)
+        end_date_obj = self._validate_date(end_date)
+
+        # Check the actual dates
+        if start_date_obj > end_date_obj:
+            raise exceptions.InvalidDateException('The `start_date` specified after the `end_date`; you will not receive any annotations.')
+
+        return self.connection.request(
+            'events/segmentation',
+            {
+                'from_date': start_date,
+                'to_date': end_date,
+                'unit': unit,
+                'on': on,
+                'where': where,
+                'unit': unit,
+                'limit': limit,
+                'type': data_type,
+            },
+            response_format=response_format
+        )
+
     # Retention methods ###############
     # People methods ##################
 
@@ -357,3 +565,7 @@ class MixpanelQueryClient(object):
         " Utility method used to validate a `data_type` param. "
         if data_type not in self.VALID_DATA_TYPES:
             raise exceptions.InvalidDataType('The `data_type` specified is invalid.  Must be {0}'.format(self.VALID_DATA_TYPES))
+
+    def _validate_expression(on, where):
+        " Validate the expression by these rules: https://mixpanel.com/docs/api-documentation/data-export-api#segmentation-expressions ."
+        raise NotImplementedError('This is not yet complete.')
