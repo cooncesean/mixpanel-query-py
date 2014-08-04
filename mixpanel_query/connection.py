@@ -20,14 +20,14 @@ class Connection(object):
     def __init__(self, client):
         self.client = client
 
-    def request(self, method_name, params, format='json'):
+    def request(self, method_name, params, response_format='json'):
         """
         Make a request to Mixpanel query endpoints and return the
         response.
         """
         params['api_key'] = self.client.api_key
         params['expire'] = int(time.time()) + 600   # Grant this request 10 minutes.
-        params['format'] = format
+        params['format'] = response_format
         if 'sig' in params:
             del params['sig']
         params['sig'] = self.hash_args(params)

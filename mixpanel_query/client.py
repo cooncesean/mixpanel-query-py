@@ -32,7 +32,7 @@ class MixpanelQueryClient(object):
     # Annotation methods ##############
 
     # Event methods ###################
-    def get_unique_events(self, event_names, unit, interval, response_format=FORMAT_JSON):
+    def get_events_unique(self, event_names, unit, interval, response_format=FORMAT_JSON):
         """
         Get unique event data for a set of event types over the last N days, weeks, or months.
 
@@ -71,7 +71,83 @@ class MixpanelQueryClient(object):
                 'unit': unit,
                 'interval': interval,
                 'type': 'unique'
+            },
+            response_format=response_format
+        )
+
+    def get_events_general(self, event_names, unit, interval, response_format=FORMAT_JSON):
+        """
+        Get general event data for a set of event types over the last N days, weeks, or months.
+
+        Args:
+            - See `get_unique_events()` docstring.
+        Reponse format:
+            - See `get_unique_events()` docstring.
+        """
+        self._validate_unit(unit)
+        self._validate_response_format(response_format)
+        return self.connection.request(
+            'events',
+            {
+                'event': event_names,
+                'unit': unit,
+                'interval': interval,
+                'type': 'general'
+            },
+            response_format=response_format
+        )
+
+    def get_events_average(self, event_names, unit, interval, response_format=FORMAT_JSON):
+        """
+        Get averaged event data for a set of event types over the last N days, weeks, or months.
+
+        Args:
+            - See `get_unique_events()` docstring.
+        Reponse format:
+            - See `get_unique_events()` docstring.
+        """
+        self._validate_unit(unit)
+        self._validate_response_format(response_format)
+        return self.connection.request(
+            'events',
+            {
+                'event': event_names,
+                'unit': unit,
+                'interval': interval,
+                'type': 'average'
+            },
+            response_format=response_format
+        )
+
+    def get_events_top(self, event_name, limit=10, response_format=FORMAT_JSON):
+        """
+        Get the top property names for an event.
+
+        Args:
+            `event_name`: [str] Te event that you wish to get data for. Note: this is a single event name, not a list.
+                          [sample]: "play song" or "log in"
+            `limit`: [int (optional)] The maximum number of properties to return. Defaults to 10.
+            `response_format`: [string (optional)]: The data return format.
+                               [sample]: "json" or "csv"
+
+        Response format:
+        {
+            'ad version': {
+                'count': 295
+            },
+            'user type': {
+                'count': 91
             }
+        }
+        """
+        self._validate_response_format(response_format)
+        return self.connection.request(
+            'events/properties/top',
+            {
+                'event': event_name,
+                'limit': limit,
+            },
+            response_format=response_format
         )
 
     # Event properties methods ########
