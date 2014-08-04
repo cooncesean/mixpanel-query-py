@@ -244,6 +244,89 @@ class MixpanelQueryClient(object):
         )
 
     # Event properties methods ########
+    def get_event_properties(self, event_name, property_name, filter_values, unit, interval, data_type='general', limit=255, response_format=FORMAT_JSON):
+        """
+        Get unique, total, or average data for of a single event and property
+        over the last N days, weeks, or months.
+
+        Response format:
+        {
+            'data': {
+                'series': ['2010-05-29', '2010-05-30', '2010-05-31'],
+                'values': {
+                    'splash features': {
+                        '2010-05-29': 6,
+                        '2010-05-30': 4,
+                        '2010-05-31': 5,
+
+                    }
+                }
+            },
+            'legend_size': 2
+        }
+        """
+        self._validate_response_format(response_format)
+        return self.connection.request(
+            'events/properties',
+            {
+                'event': event_name,
+                'name': property_name,
+                'values': filter_values,
+                'unit': unit,
+                'interval': interval,
+                'type': data_type,
+                'limit': limit,
+            },
+            response_format=response_format
+        )
+
+    def get_event_properties_top(self, event_name, limit=10, response_format=FORMAT_JSON):
+        """
+        Get the top property names for an event.
+
+        Response format:
+        {
+            'ad version': {
+                'count': 295
+            },
+            'user type': {
+                'count': 91
+            }
+        }
+        """
+        self._validate_response_format(response_format)
+        return self.connection.request(
+            'events/properties/top',
+            {
+                'event': event_name,
+                'limit': limit,
+            },
+            response_format=response_format
+        )
+
+    def get_event_properties_values(self, event_name, property_name, limit=255, bucket_id=None, response_format=FORMAT_JSON):
+        """
+        Get the top values for a property ordered by volume, descending.
+
+        Response format:
+            ['male', 'female', 'unknown']
+        """
+        self._validate_response_format(response_format)
+
+        params = {
+            'event': event_name,
+            'name': property_name,
+            'limit': limit,
+        }
+        if bucket_id:
+            params.update({'bucket': bucket_id})
+
+        return self.connection.request(
+            'events/properties/values',
+            params,
+            response_format=response_format
+        )
+
     # Funnel methods ##################
     # Segmentation methods ############
     # Retention methods ###############
