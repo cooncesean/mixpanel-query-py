@@ -15,6 +15,7 @@ or alternatively (you really should be using pip though):
 ```
 $ easy_install mixpanel-query-py
 ```
+
 or from source:
 
 ```
@@ -35,7 +36,7 @@ from your_project.conf import MIXPANEL_API_KEY, MIXPANEL_API_SECRET
 query_client = MixpanelQueryClient(MIXPANEL_API_KEY, MIXPANEL_API_SECRET)
 
 # Query your project's data
-data = query_client.get_unique_events(['Some Event Name'], 'hour', 24)
+data = query_client.get_events_unique(['Some Event Name'], 'hour', 24)
 print data
 {
     'data': {
