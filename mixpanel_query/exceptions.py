@@ -17,6 +17,6 @@ class ExpiredRequestException(MixpanelQueryException):
     " The request is past its expiration date (default 10 minutes). "
     pass
 
-class InvalidDateRangeException(MixpanelQueryException):
+class InvalidDateException(MixpanelQueryException):
     " The date range you have specified is not 30 days or less. "
     pass

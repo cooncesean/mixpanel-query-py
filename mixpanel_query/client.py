@@ -1,5 +1,7 @@
+import datetime
+
+from mixpanel_query import exceptions
 from mixpanel_query.connection import Connection
-from mixpanel_query.exceptions import InvalidUnitException, InvalidFormatException
 
 
 class MixpanelQueryClient(object):
@@ -30,6 +32,124 @@ class MixpanelQueryClient(object):
         self.connection = Connection(self)
 
     # Annotation methods ##############
+    def annotations_list(self, start_date, end_date, response_format=FORMAT_JSON):
+        """
+        List the annotations for the given date range.
+
+        Args:
+            `start_date`: [str] The beginning of the date range to get annotations for in yyyy-mm-dd
+                                format. This date is inclusive.
+                          [sample]: "2014-04-01"
+            `end_date`: [str] The end of the date range to get annotations for in yyyy-mm-dd format.
+                              This date is inclusive.
+                        [sample]: "2014-04-01"
+            `response_format`: [string (optional)]: The data return format.
+                               [sample]: "json" or "csv"
+
+        Response format:
+        {
+            'annotations': [
+                {'date': '2014-05-23 00:00:00', 'project_id': 23880, 'id': 148, 'description': 'Launched v2.0 of product'},
+                {'date': '2014-05-29 00:00:00', 'project_id': 23880, 'id': 150, 'description': 'Streamlined registration process'}
+            ],
+            'error': false
+        }
+        """
+        start_date_obj = self._validate_date(start_date)
+        end_date_obj = self._validate_date(end_date)
+
+        # Check the actual dates
+        if start_date_obj > end_date_obj:
+            raise exceptions.InvalidDateException('The `start_date` specified after the `end_date`; you will not receive any annotations.')
+
+        return self.connection.request(
+            'annotations',
+            {
+                'from_date': start_date,
+                'to_date': end_date,
+            },
+            response_format=response_format
+        )
+
+    def annotation_create(self, date, description, response_format=FORMAT_JSON):
+        """
+        Create a new annotation at the specified time.
+
+        Args:
+            `date`: [str] The time in yyyy-mm-hh HH:MM:SS when you want to create the annotation at.
+                    [sample]: "2014-04-01 02:12:44"
+            `description`: [str] The annotation description.
+                           [sample]: "Something happened on this date."
+            `response_format`: [string (optional)]: The data return format.
+                               [sample]: "json" or "csv"
+
+        Response format:
+            {
+                'error': false
+            }
+        """
+        date_obj = self._validate_date(date)
+        return self.connection.request(
+            'annotations/create',
+            {
+                'date': date_obj.strftime('%Y-%m-%d %H:%M:%S'),
+                'description': description,
+            },
+            response_format=response_format
+        )
+
+    def annotation_update(self, annotation_id, date, description, response_format=FORMAT_JSON):
+        """
+        Update an existing annotation with a new description.
+
+        Args:
+            `annotation_id`: [int] The id of the annotation you wish to update.
+                             [sample]: 1
+            `date`: [str] The time in yyyy-mm-hh HH:MM:SS when you want to create the annotation at.
+                    [sample]: "2014-04-01 02:12:44"
+            `description`: [str] The annotation description.
+                           [sample]: "Something happened on this date."
+            `response_format`: [string (optional)]: The data return format.
+                               [sample]: "json" or "csv"
+
+        Response format:
+            {
+                'error': false
+            }
+        """
+        date_obj = self._validate_date(date)
+        return self.connection.request(
+            'annotations/update',
+            {
+                'id': annotation_id,
+                'date': date_obj.strftime('%Y-%m-%d %H:%M:%S'),
+                'description': description,
+            },
+            response_format=response_format
+        )
+
+    def annotation_delete(self, annotation_id, response_format=FORMAT_JSON):
+        """
+        Delete an existing annotation.
+
+        Args:
+            `annotation_id`: [int] The id of the annotation you wish to delete.
+                             [sample]: 1
+            `response_format`: [string (optional)]: The data return format.
+                               [sample]: "json" or "csv"
+
+        Response format:
+            {
+                'error': false
+            }
+        """
+        return self.connection.request(
+            'annotations/delete',
+            {
+                'id': annotation_id,
+            },
+            response_format=response_format
+        )
 
     # Event methods ###################
     def get_events_unique(self, event_names, unit, interval, response_format=FORMAT_JSON):
@@ -160,9 +280,19 @@ class MixpanelQueryClient(object):
     def _validate_unit(self, unit):
         " Utility method used to validate a `unit` param. "
         if unit not in self.VALID_UNITS:
-            raise InvalidUnitException('The `unit` specified is invalid. Must be: {0}'.format(self.VALID_UNITS))
+            raise exceptions.InvalidUnitException('The `unit` specified is invalid. Must be: {0}'.format(self.VALID_UNITS))
 
     def _validate_response_format(self, response_format):
         " Utility method used to validate a `response_format` param. "
         if response_format not in self.VALID_RESPONSE_FORMATS:
-            raise InvalidFormatException('The `response_format` specified is invalid. Must be {0}.'.format(self.VALID_RESPONSE_FORMATS))
+            raise exceptions.InvalidFormatException('The `response_format` specified is invalid. Must be {0}.'.format(self.VALID_RESPONSE_FORMATS))
+
+    def _validate_date(self, date):
+        " Utility method used to validate a `response_format` param. "
+        try:
+            return datetime.datetime.strptime(date, '%Y-%m-%d')
+        except ValueError:
+            try:
+                return datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                raise exceptions.InvalidDateException('The `date` specified is invalid. Must be in `YYYY-MM-DD` format.')
