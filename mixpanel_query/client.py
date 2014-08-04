@@ -270,6 +270,37 @@ class MixpanelQueryClient(object):
             response_format=response_format
         )
 
+    def get_event_top_names(self, event_type='general', limit=255, response_format=FORMAT_JSON):
+        """
+        Get a list of the most common events over the last 31 days; ordered by volume, descending
+
+        Args:
+            `event_type`: [str] The analysis type you would like to get data for.
+                          [sample]: Valid values: 'general', 'unique', or 'average'
+            `limit`: [int (optional)] The maximum number of properties to return. Defaults to 10.
+            `response_format`: [string (optional)]: The data return format.
+                               [sample]: "json" or "csv"
+
+        Response format:
+        {
+            'ad version': {
+                'count': 295
+            },
+            'user type': {
+                'count': 91
+            }
+        }
+        """
+        self._validate_response_format(response_format)
+        return self.connection.request(
+            'events/names',
+            {
+                'event_type': event_type,
+                'limit': limit,
+            },
+            response_format=response_format
+        )
+
     # Event properties methods ########
     # Funnel methods ##################
     # Segmentation methods ############
