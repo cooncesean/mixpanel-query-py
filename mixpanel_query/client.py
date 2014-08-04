@@ -537,6 +537,188 @@ class MixpanelQueryClient(object):
             response_format=response_format
         )
 
+    def get_segmentation_numeric(
+            self, event_name, start_date, end_date,
+            unit=UNIT_DAY, on=None, where=None,
+            buckets=None, response_format=FORMAT_JSON):
+        """
+        Get data for an event, segmented and filtered by properties, with values placed into numeric buckets.
+
+        # Example 1
+        Kevin also has an event named page loaded. It has a property named time
+        that represents the time in milliseconds it took to load the page. Kevin
+        wants to see the distribution of page load times that are greater than
+        2000 milliseconds. But suppose Harry accidentally was sending the time
+        property to Mixpanel as a string, so its the incorrect type. He can make
+        the following query involving an explicit typecast to number to get the
+        results he wants:
+
+        > user_client.get_segmentation_numeric(
+            'page loaded',
+            '2011-08-06',
+            '2011-08-16',
+            on='number(properties["time"])',
+            where='number(properties["time"]) >= 2000',
+            bukets=5
+        )
+        {
+            'data': {
+                'series': ['2011-08-08', '2011-08-09', '2011-08-06', '2011-08-07'],
+                'values': {
+                    '2,000 - 2,100': {
+                        '2011-08-06': 1,
+                        '2011-08-07': 5,
+                        '2011-08-08': 4,
+                        '2011-08-09': 15
+                    },
+                    '2,100 - 2,200': {
+                        '2011-08-07': 2,
+                        '2011-08-08': 7,
+                        '2011-08-09': 15
+                    },
+                    '2,200 - 2,300': {
+                        '2011-08-06': 1,
+                        '2011-08-08': 6,
+                        '2011-08-09': 5
+                    },
+                    '2,300 - 2,400': {
+                        '2011-08-06': 4,
+                        '2011-08-08': 1,
+                        '2011-08-09': 12
+                    },
+                    '2,400 - 2,500': {
+                        '2011-08-08': 2,
+                        '2011-08-09': 5
+                    }
+                }
+            },
+            'legend_size': 5
+        }
+        """
+        self._validate_response_format(response_format)
+        self._validate_expression(on, where)
+        start_date_obj = self._validate_date(start_date)
+        end_date_obj = self._validate_date(end_date)
+
+        # Check the actual dates
+        if start_date_obj > end_date_obj:
+            raise exceptions.InvalidDateException('The `start_date` specified after the `end_date`; you will not receive any annotations.')
+
+        return self.connection.request(
+            'events/segmentation/numeric',
+            {
+                'from_date': start_date,
+                'to_date': end_date,
+                'unit': unit,
+                'on': on,
+                'where': where,
+                'unit': unit,
+                'bukets': buckets,
+            },
+            response_format=response_format
+        )
+
+    def get_segmentation_sum(
+            self, event_name, start_date, end_date,
+            unit=UNIT_DAY, on=None, where=None,
+            response_format=FORMAT_JSON):
+        """
+        Sums an expression for events per unit time.
+
+        # Example 1
+        Kevin also sells things from example.com. He has an event named item sold
+        that tracks each item that gets sold from his website. It has a number property
+        named price that records the value of the item being sold. He has another number
+        property named overhead that represents the overhead cost of the item. Kevin
+        can find out how much profit he is making each day with the following query:
+
+        > user_client.get_segmentation_sum(
+            'item sold',
+            '2011-08-06',
+            '2011-08-16',
+            on='properties["price"] - properties["overhead"]',
+        )
+        {   'results': {
+                '2011-08-06': 376.0,
+                '2011-08-07': 634.0,
+                '2011-08-08': 474.0,
+                '2011-08-09': 483.0
+        },
+            'status': 'ok'
+        }
+        """
+        self._validate_response_format(response_format)
+        self._validate_expression(on, where)
+        start_date_obj = self._validate_date(start_date)
+        end_date_obj = self._validate_date(end_date)
+
+        # Check the actual dates
+        if start_date_obj > end_date_obj:
+            raise exceptions.InvalidDateException('The `start_date` specified after the `end_date`; you will not receive any annotations.')
+
+        return self.connection.request(
+            'events/segmentation/sum',
+            {
+                'from_date': start_date,
+                'to_date': end_date,
+                'unit': unit,
+                'on': on,
+                'where': where,
+                'unit': unit,
+            },
+            response_format=response_format
+        )
+
+    def get_segmentation_average(
+            self, event_name, start_date, end_date,
+            unit=UNIT_DAY, on=None, where=None,
+            response_format=FORMAT_JSON):
+        """
+        Averages an expression for events per unit time.
+
+        # Example 1
+        Instead of finding out the total profit he is making per day by selling things
+        from his website, Kevin can also find out the average price of an item being
+        sold with the following query:
+
+        > user_client.get_segmentation_average(
+            'item sold',
+            '2011-08-06',
+            '2011-08-16',
+            on='properties["price"] - properties["overhead"]',
+        )
+        {
+            'results': {
+                '2011-08-06': 8.64705882352939,
+                '2011-08-07': 4.640625,
+                '2011-08-08': 3.6230899830221,
+                '2011-08-09': 7.3353658536585
+            },
+            'status': 'ok'
+        }
+        """
+        self._validate_response_format(response_format)
+        self._validate_expression(on, where)
+        start_date_obj = self._validate_date(start_date)
+        end_date_obj = self._validate_date(end_date)
+
+        # Check the actual dates
+        if start_date_obj > end_date_obj:
+            raise exceptions.InvalidDateException('The `start_date` specified after the `end_date`; you will not receive any annotations.')
+
+        return self.connection.request(
+            'events/segmentation/average',
+            {
+                'from_date': start_date,
+                'to_date': end_date,
+                'unit': unit,
+                'on': on,
+                'where': where,
+                'unit': unit,
+            },
+            response_format=response_format
+        )
+
     # Retention methods ###############
     # People methods ##################
 
