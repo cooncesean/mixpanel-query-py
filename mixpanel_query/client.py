@@ -26,6 +26,11 @@ class MixpanelQueryClient(object):
     FORMAT_CSV = 'csv'
     VALID_RESPONSE_FORMATS = (FORMAT_JSON, FORMAT_CSV)
 
+    DATA_TYPE_GENERAL = 'general'
+    DATA_TYPE_AVERAGE = 'average'
+    DATA_TYPE_UNIQUE = 'unique'
+    VALID_DATA_TYPES = (DATA_TYPE_GENERAL, DATA_TYPE_AVERAGE, DATA_TYPE_UNIQUE)
+
     def __init__(self, api_key, api_secret):
         self.api_key = api_key
         self.api_secret = api_secret
@@ -152,52 +157,10 @@ class MixpanelQueryClient(object):
         )
 
     # Event methods ###################
-    def get_events_unique(self, event_names, unit, interval, response_format=FORMAT_JSON):
+    def get_events(self, event_names, unit, interval, data_type=DATA_TYPE_UNIQUE, response_format=FORMAT_JSON):
         """
-        Get unique event data for a set of event types over the last N days, weeks, or months.
-
-        Args:
-            `event_names`: [list] The event or events that you wish to get data for.
-                           [sample]: ["play song", "log in", "add playlist"]
-            `unit`: [str] Determines the level of granularity of the data you get back.
-                    [sample]: "day" or "month" or "week"
-            `interval`: [int] The number of "units" to return data for. `1` will return data for the
-                              current unit (minute, hour, day, week or month). `2` will return the
-                              current and previous units, and so on.
-            `response_format`: [string (optional)]: The data return format.
-                               [sample]: "json" or "csv"
-
-        Response format:
-        {
-            u'data': {
-                u'series': [u'2014-07-11', u'2014-07-12', u'2014-07-13'],
-                u'values': {
-                    u'Guide Download': {
-                        u'2014-07-11': 80,
-                        u'2014-07-12': 100,
-                        u'2014-07-13': 123,  # Date + unique event counts
-                    }
-                }
-            },
-             u'legend_size': 1
-        }
-        """
-        self._validate_unit(unit)
-        self._validate_response_format(response_format)
-        return self.connection.request(
-            'events',
-            {
-                'event': event_names,
-                'unit': unit,
-                'interval': interval,
-                'type': 'unique'
-            },
-            response_format=response_format
-        )
-
-    def get_events_general(self, event_names, unit, interval, response_format=FORMAT_JSON):
-        """
-        Get general event data for a set of event types over the last N days, weeks, or months.
+        Get unique, total, or average data for a set of events over the last N days,
+        weeks, or months.
 
         Args:
             - See `get_unique_events()` docstring.
@@ -206,35 +169,14 @@ class MixpanelQueryClient(object):
         """
         self._validate_unit(unit)
         self._validate_response_format(response_format)
+        self._validate_data_type(data_type)
         return self.connection.request(
             'events',
             {
                 'event': event_names,
                 'unit': unit,
                 'interval': interval,
-                'type': 'general'
-            },
-            response_format=response_format
-        )
-
-    def get_events_average(self, event_names, unit, interval, response_format=FORMAT_JSON):
-        """
-        Get averaged event data for a set of event types over the last N days, weeks, or months.
-
-        Args:
-            - See `get_unique_events()` docstring.
-        Reponse format:
-            - See `get_unique_events()` docstring.
-        """
-        self._validate_unit(unit)
-        self._validate_response_format(response_format)
-        return self.connection.request(
-            'events',
-            {
-                'event': event_names,
-                'unit': unit,
-                'interval': interval,
-                'type': 'average'
+                'type': data_type,
             },
             response_format=response_format
         )
@@ -270,7 +212,7 @@ class MixpanelQueryClient(object):
             response_format=response_format
         )
 
-    def get_event_top_names(self, event_type='general', limit=255, response_format=FORMAT_JSON):
+    def get_event_top_names(self, data_type='general', limit=255, response_format=FORMAT_JSON):
         """
         Get a list of the most common events over the last 31 days; ordered by volume, descending
 
@@ -295,7 +237,7 @@ class MixpanelQueryClient(object):
         return self.connection.request(
             'events/names',
             {
-                'event_type': event_type,
+                'type': data_type,
                 'limit': limit,
             },
             response_format=response_format
@@ -327,3 +269,8 @@ class MixpanelQueryClient(object):
                 return datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
             except ValueError:
                 raise exceptions.InvalidDateException('The `date` specified is invalid. Must be in `YYYY-MM-DD` format.')
+
+    def _validate_data_type(self, data_type):
+        " Utility method used to validate a `data_type` param. "
+        if data_type not in self.VALID_DATA_TYPES:
+            raise exceptions.InvalidDataType('The `data_type` specified is invalid.  Must be {0}'.format(self.VALID_DATA_TYPES))

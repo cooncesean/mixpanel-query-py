@@ -20,3 +20,7 @@ class ExpiredRequestException(MixpanelQueryException):
 class InvalidDateException(MixpanelQueryException):
     " The date range you have specified is not 30 days or less. "
     pass
+
+class InvalidDataType(MixpanelQueryException):
+    " The data type you have specified is invalid. "
+    pass
