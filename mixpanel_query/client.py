@@ -514,7 +514,7 @@ class MixpanelQueryClient(object):
         }
         """
         self._validate_response_format(response_format)
-        self._validate_expression(on, where)
+        #self._validate_expression(on, where)
         start_date_obj = self._validate_date(start_date)
         end_date_obj = self._validate_date(end_date)
 
@@ -523,14 +523,14 @@ class MixpanelQueryClient(object):
             raise exceptions.InvalidDateException('The `start_date` specified after the `end_date`; you will not receive any annotations.')
 
         return self.connection.request(
-            'events/segmentation',
+            'segmentation',
             {
+                'event': event_name,
                 'from_date': start_date,
                 'to_date': end_date,
                 'unit': unit,
                 'on': on,
                 'where': where,
-                'unit': unit,
                 'limit': limit,
                 'type': data_type,
             },
@@ -596,7 +596,7 @@ class MixpanelQueryClient(object):
         }
         """
         self._validate_response_format(response_format)
-        self._validate_expression(on, where)
+        #self._validate_expression(on, where)
         start_date_obj = self._validate_date(start_date)
         end_date_obj = self._validate_date(end_date)
 
@@ -605,22 +605,22 @@ class MixpanelQueryClient(object):
             raise exceptions.InvalidDateException('The `start_date` specified after the `end_date`; you will not receive any annotations.')
 
         return self.connection.request(
-            'events/segmentation/numeric',
+            'segmentation/numeric',
             {
+                'event': event_name,
                 'from_date': start_date,
                 'to_date': end_date,
                 'unit': unit,
                 'on': on,
                 'where': where,
-                'unit': unit,
                 'bukets': buckets,
             },
             response_format=response_format
         )
 
     def get_segmentation_sum(
-            self, event_name, start_date, end_date,
-            unit=UNIT_DAY, on=None, where=None,
+            self, event_name, start_date, end_date, on,
+            unit=UNIT_DAY, where=None,
             response_format=FORMAT_JSON):
         """
         Sums an expression for events per unit time.
@@ -648,7 +648,7 @@ class MixpanelQueryClient(object):
         }
         """
         self._validate_response_format(response_format)
-        self._validate_expression(on, where)
+        #self._validate_expression(on, where)
         start_date_obj = self._validate_date(start_date)
         end_date_obj = self._validate_date(end_date)
 
@@ -657,14 +657,14 @@ class MixpanelQueryClient(object):
             raise exceptions.InvalidDateException('The `start_date` specified after the `end_date`; you will not receive any annotations.')
 
         return self.connection.request(
-            'events/segmentation/sum',
+            'segmentation/sum',
             {
+                'event': event_name,
                 'from_date': start_date,
                 'to_date': end_date,
                 'unit': unit,
                 'on': on,
-                'where': where,
-                'unit': unit,
+                'where': where
             },
             response_format=response_format
         )
@@ -707,7 +707,7 @@ class MixpanelQueryClient(object):
             raise exceptions.InvalidDateException('The `start_date` specified after the `end_date`; you will not receive any annotations.')
 
         return self.connection.request(
-            'events/segmentation/average',
+            'segmentation/average',
             {
                 'from_date': start_date,
                 'to_date': end_date,
@@ -748,6 +748,6 @@ class MixpanelQueryClient(object):
         if data_type not in self.VALID_DATA_TYPES:
             raise exceptions.InvalidDataType('The `data_type` specified is invalid.  Must be {0}'.format(self.VALID_DATA_TYPES))
 
-    def _validate_expression(on, where):
+    def _validate_expression(self, on, where):
         " Validate the expression by these rules: https://mixpanel.com/docs/api-documentation/data-export-api#segmentation-expressions ."
         raise NotImplementedError('This is not yet complete.')
