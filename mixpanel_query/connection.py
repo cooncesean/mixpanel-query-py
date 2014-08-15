@@ -28,9 +28,14 @@ class Connection(object):
         params['api_key'] = self.client.api_key
         params['expire'] = int(time.time()) + 600   # Grant this request 10 minutes.
         params['format'] = response_format
+        # Getting rid of the None params
+        params = self.check_params(params)
+
+        # Creating signature
         if 'sig' in params:
             del params['sig']
-        params['sig'] = self.hash_args(params)
+        params['sig'] = self.hash_args(params, self.client.api_secret)
+
         request_url = '{base_url}/{version}/{method_name}/?{encoded_params}'.format(
             base_url=self.ENDPOINT,
             version=self.VERSION,
@@ -86,3 +91,11 @@ class Connection(object):
         elif self.client.api_secret:
             hash.update(self.client.api_secret)
         return hash.hexdigest()
+
+    def check_params(self, params):
+        copyParams = params.copy()
+        for key in copyParams.iterkeys():
+            if not copyParams[key]:
+                del params[key]
+
+        return params
