@@ -538,8 +538,8 @@ class MixpanelQueryClient(object):
         )
 
     def get_segmentation_numeric(
-            self, event_name, start_date, end_date,
-            unit=UNIT_DAY, on=None, where=None,
+            self, event_name, start_date, end_date, on,
+            unit=UNIT_DAY, where=None,
             buckets=None, response_format=FORMAT_JSON):
         """
         Get data for an event, segmented and filtered by properties, with values placed into numeric buckets.
