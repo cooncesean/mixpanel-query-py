@@ -615,6 +615,7 @@ class MixpanelQueryClient(object):
                 'on': on,
                 'where': where,
                 'bukets': buckets,
+                'type': data_type,
             },
             response_format=response_format
         )
