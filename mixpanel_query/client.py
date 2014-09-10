@@ -343,7 +343,7 @@ class MixpanelQueryClient(object):
         """
         self._validate_response_format(response_format)
         return self.connection.request(
-            'events/funnels/list',
+            'funnels/list',
             {},
             response_format=response_format
         )
@@ -417,16 +417,16 @@ class MixpanelQueryClient(object):
         self._validate_response_format(response_format)
         start_date_obj = self._validate_date(start_date)
         end_date_obj = self._validate_date(end_date)
-        self._validate_expression(on, where)
+        # self._validate_expression(on, where)
 
         # Check the actual dates
         if start_date_obj > end_date_obj:
             raise exceptions.InvalidDateException('The `start_date` specified after the `end_date`; you will not receive any annotations.')
 
         return self.connection.request(
-            'events/funnels',
+            'funnels',
             {
-                'id': funnel_id,
+                'funnel_id': funnel_id,
                 'from_date': start_date,
                 'to_date': end_date,
                 'length': length,
