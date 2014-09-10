@@ -1,0 +1,5 @@
+* 0.1.1
+    * Fixed both `funnel` api calls; thanks to Nejc Zupan for the patch.
+* 0.1.0
+    * Initial bare bones release which was added to PyPi.
+    * Thanks to Francis Genet and Patrick McNally for their contributions.
