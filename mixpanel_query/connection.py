@@ -15,6 +15,7 @@ class Connection(object):
     and parse http responses from the Mixpanel API.
     """
     ENDPOINT = 'http://mixpanel.com/api'
+    DATA_ENDPOINT = 'https://data.mixpanel.com/api'
     VERSION = '2.0'
 
     def __init__(self, client):
@@ -23,7 +24,16 @@ class Connection(object):
     def request(self, method_name, params, response_format='json'):
         """
         Make a request to Mixpanel query endpoints and return the
-        response.
+        parsed response.
+        """
+        request = self.raw_request(self.ENDPOINT, method_name, params, response_format)
+        data = request.read()
+        return json.loads(data)
+
+    def raw_request(self, base_url, method_name, params, response_format):
+        """
+        Make a request to the Mixpanel API and return a raw urllib2 file-like
+        response object.
         """
         params['api_key'] = self.client.api_key
         params['expire'] = int(time.time()) + 600   # Grant this request 10 minutes.
@@ -37,14 +47,12 @@ class Connection(object):
         params['sig'] = self.hash_args(params, self.client.api_secret)
 
         request_url = '{base_url}/{version}/{method_name}/?{encoded_params}'.format(
-            base_url=self.ENDPOINT,
+            base_url=base_url,
             version=self.VERSION,
             method_name=method_name,
             encoded_params=self.unicode_urlencode(params)
         )
-        request = urllib2.urlopen(request_url, timeout=120)
-        data = request.read()
-        return json.loads(data)
+        return urllib2.urlopen(request_url, timeout=120)
 
     def unicode_urlencode(self, params):
         """

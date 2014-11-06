@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from mixpanel_query import exceptions
 from mixpanel_query.connection import Connection
@@ -750,6 +751,57 @@ class MixpanelQueryClient(object):
             },
             response_format=response_format
         )
+
+    # Export methods ##################
+    def get_export(self, start_date, end_date, event=None, where=None, bucket_id=None, response_format=FORMAT_JSON):
+        """
+        Get a "raw dump" of tracked events over a time period.
+
+        Yields events as they are returned (matching the format shown below).
+
+        Args:
+            `start_date`: [str] The date in yyyy-mm-dd format from which to begin querying for the
+                                event from. This date is inclusive.
+                          [sample]: "2014-04-01"
+            `end_date`: [str] The date in yyyy-mm-dd format from which to stop querying for the
+                              event from. This date is inclusive.
+                        [sample]: "2014-04-01"
+            `event`: [array (optional)]: The event or events that you wish to get data for.
+                               [sample]: ["play song", "log in", "add playlist"]
+            `where`: [str] An expression to filter events by.
+            `bucket_id`: [str] The specific data bucket you would like to query.
+
+        Event format:
+            {"event":"Viewed report","properties":{"distinct_id":"foo","time":1329263748,"origin":"invite",
+            "origin_referrer":"http://mixpanel.com/projects/","$initial_referring_domain":"mixpanel.com",
+            "$referrer":"https://mixpanel.com/report/3/stream/","$initial_referrer":"http://mixpanel.com/",
+            "$referring_domain":"mixpanel.com","$os":"Linux","origin_domain":"mixpanel.com","tab":"stream",
+            "$browser":"Chrome","Project ID":"3","mp_country_code":"US"}}
+        """
+        start_date_obj = self._validate_date(start_date)
+        end_date_obj = self._validate_date(end_date)
+
+        # Check the actual dates
+        if start_date_obj > end_date_obj:
+            raise exceptions.InvalidDateException('The `start_date` specified after the `end_date`; you will not receive any events.')
+
+        if isinstance(event, str):
+            event = [event]
+
+        response = self.connection.raw_request(
+            Connection.DATA_ENDPOINT,
+            'export',
+            {
+                'from_date': start_date,
+                'to_date': end_date,
+                'event': event,
+                'where': where,
+                'bucket': bucket_id,
+            },
+            response_format
+        )
+        for line in response:
+            yield json.loads(line)
 
     # Util methods ####################
     def _validate_unit(self, unit):
