@@ -540,7 +540,7 @@ class MixpanelQueryClient(object):
     def get_segmentation_numeric(
             self, event_name, start_date, end_date, on,
             unit=UNIT_DAY, where=None,
-            buckets=None, data_type=DATA_TYPE_UNIQUE, 
+            buckets=None, data_type=DATA_TYPE_UNIQUE,
             response_format=FORMAT_JSON):
         """
         Get data for an event, segmented and filtered by properties, with values placed into numeric buckets.
@@ -560,7 +560,7 @@ class MixpanelQueryClient(object):
             '2011-08-16',
             on='number(properties["time"])',
             where='number(properties["time"]) >= 2000',
-            bukets=5
+            buckets=5
         )
         {
             'data': {
@@ -614,7 +614,7 @@ class MixpanelQueryClient(object):
                 'unit': unit,
                 'on': on,
                 'where': where,
-                'bukets': buckets,
+                'buckets': buckets,
                 'type': data_type,
             },
             response_format=response_format
