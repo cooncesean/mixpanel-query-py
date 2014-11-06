@@ -1,3 +1,10 @@
+* 0.1.3
+    * Adds support for `engage` API calls (Query People Data).
+    * Adds support for `export` API calls (Get a "raw dump" of tracked events over a time period).
+        - Note: Hits slightly different URI `data.mixpanel.com` and the `connection` class has been
+          changed accordingly.
+    * Adds `ConcurrentPaginator` which improves performance paginating through people in the `engage` API.
+    * Thanks to Harry Marr (hmarr) for these improvements.
 * 0.1.2
     * Patches the `get_segmentation_numeric` api call (fixed `bucket` typo); thanks to Harry Marr (hmarr) for the patch.
 * 0.1.1
