@@ -722,7 +722,34 @@ class MixpanelQueryClient(object):
         )
 
     # Retention methods ###############
+
     # People methods ##################
+    def get_engage(self, where=None, session_id=None, page=None, response_format=FORMAT_JSON):
+        """
+        Query People Data.
+
+        Reponse format:
+            {'page': 0,
+             'page_size': 1000,
+             'results': [{'$distinct_id': 4,
+                          '$properties': {'$created': '2008-12-12T11:20:47',
+                                          '$email': 'example@mixpanel.com',
+                                          '$first_name': 'Example',
+                                          '$last_name': 'Name',
+                                          '$last_seen': '2008-06-09T23:08:40',}}],
+             'session_id': '1234567890-EXAMPL',
+             'status': 'ok',
+             'total': 1}
+        """
+        return self.connection.request(
+            'engage',
+            {
+                'where': where,
+                'session_id': session_id,
+                'page': page,
+            },
+            response_format=response_format
+        )
 
     # Util methods ####################
     def _validate_unit(self, unit):
