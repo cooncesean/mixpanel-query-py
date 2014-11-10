@@ -40,9 +40,6 @@ class ConcurrentPaginator(object):
         fetcher = self._results_fetcher(params)
         return results + self._concurrent_flatmap(fetcher, range(start, end))
 
-    def _fetch(self, method, params=None):
-        return self.client.get_engage(params)
-
     def _results_fetcher(self, params):
         def _fetcher_func(page):
             req_params = dict(params.items() + [('page', page)])
