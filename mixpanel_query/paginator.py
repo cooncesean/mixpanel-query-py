@@ -53,4 +53,3 @@ class ConcurrentPaginator(object):
     def _remaining_page_range(self, response):
         num_pages = math.ceil(response['total'] / float(response['page_size']))
         return (response['page'] + 1, int(num_pages))
-
