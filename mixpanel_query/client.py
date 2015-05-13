@@ -712,6 +712,7 @@ class MixpanelQueryClient(object):
         return self.connection.request(
             'segmentation/average',
             {
+                'event': event_name,
                 'from_date': start_date,
                 'to_date': end_date,
                 'unit': unit,
