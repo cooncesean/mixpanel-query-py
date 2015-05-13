@@ -701,7 +701,7 @@ class MixpanelQueryClient(object):
         }
         """
         self._validate_response_format(response_format)
-        self._validate_expression(on, where)
+        #self._validate_expression(on, where)
         start_date_obj = self._validate_date(start_date)
         end_date_obj = self._validate_date(end_date)
 
