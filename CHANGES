@@ -1,3 +1,7 @@
+* 0.1.4
+    * Removes unimplemented validation call in `get_segmentation_average` method.
+    * Passes `event_name` arg to `segmentation/vaverage` api call in `get_segmentation_average`.
+    * Thanks to `thesmallestduck` for the patches.
 * 0.1.3
     * Adds support for `engage` API calls (Query People Data).
     * Adds support for `export` API calls (Get a "raw dump" of tracked events over a time period).
