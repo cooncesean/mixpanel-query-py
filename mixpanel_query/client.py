@@ -723,6 +723,89 @@ class MixpanelQueryClient(object):
             response_format=response_format
         )
 
+    def get_segmentation_multiseg(
+            self, event_name, start_date, end_date,
+            unit=UNIT_DAY, inner=None, outer=None,
+            data_type=DATA_TYPE_GENERAL, where=None,
+            limit=None, response_format=FORMAT_JSON):
+        """
+        WARNING THIS IS AN UNDOCUMENTED API ENDPOINT
+        USE AT YOUR OWN RISK, MIXPANEL MAY CHANGE THIS
+
+        This allows a user to segment on two properties rather
+        just one. Example:
+
+        > user_client.get_segmentation_multiseg(
+            'item sold',
+            '2011-08-06',
+            '2011-08-16',
+            inner='properties["$city"]',
+            outer='properties["$region"]',
+        )
+        {   
+        u'data': {   
+            u'series': [u'2015-06-01', u'2015-06-02', u'2015-06-03'],
+            u'values': {   
+                u'North Carolina': {   
+                    u'Charlotte': {   
+                        u'2015-06-01': 300,
+                        u'2015-06-02': 111,
+                        u'2015-06-03': 171
+                    },
+                    u'Austin': {   
+                        u'2015-06-01': 0,
+                        u'2015-06-02': 0,
+                        u'2015-06-03': 0
+                    }
+                },
+                u'Texas': {   
+                    u'Charlotte': {   
+                        u'2015-06-01': 0,
+                        u'2015-06-02': 0,
+                        u'2015-06-03': 0},
+                    u'Austin': {   
+                        u'2015-06-01': 3181,
+                        u'2015-06-02': 3219,
+                        u'2015-06-03': 3484
+                    }
+                }
+            }
+        },
+        u'legend_size': 4
+        }
+
+
+        Note the way this works. Limit defines the range for both the inner
+        outer properties. The top <limit> outer segments are matched against
+        the top <limit> inner segments. In the case of region ond city
+        this results in many nested segments with zero results. At this time
+        you do not get the top inner segments per outer segment.
+        """
+        self._validate_response_format(response_format)
+        #self._validate_expression(inner, outer, where)
+        start_date_obj = self._validate_date(start_date)
+        end_date_obj = self._validate_date(end_date)
+
+        # Check the actual dates
+        if start_date_obj > end_date_obj:
+            raise exceptions.InvalidDateException('The `start_date` specified after the `end_date`; you will not receive any annotations.')
+
+        return self.connection.request(
+            'segmentation/multiseg',
+            {
+                'event': event_name,
+                'from_date': start_date,
+                'to_date': end_date,
+                'unit': unit,
+                'inner': inner,
+                'outer': outer,
+                'where': where,
+                'type': data_type,
+                'limit': limit,
+            },
+            response_format=response_format
+        )
+
     # Retention methods ###############
 
     # People methods ##################
