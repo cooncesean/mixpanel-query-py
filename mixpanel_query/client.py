@@ -4,15 +4,7 @@ import six
 
 from mixpanel_query import exceptions
 from mixpanel_query.connection import Connection
-
-
-def _totext(val):
-    if isinstance(val, six.text_type):
-        return val
-    elif isinstance(val, six.binary_type):
-        return val.decode('utf-8')
-    else:
-        return val
+from mixpanel_query.utils import _totext
 
 class MixpanelQueryClient(object):
     """
@@ -42,8 +34,8 @@ class MixpanelQueryClient(object):
     VALID_DATA_TYPES = (DATA_TYPE_GENERAL, DATA_TYPE_AVERAGE, DATA_TYPE_UNIQUE)
 
     def __init__(self, api_key, api_secret):
-        self.api_key = api_key
-        self.api_secret = api_secret
+        self.api_key = _totext(api_key)
+        self.api_secret = _totext(api_secret)
         self.connection = Connection(self)
 
     # Annotation methods ##############

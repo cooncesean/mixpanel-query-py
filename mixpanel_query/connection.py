@@ -9,16 +9,10 @@ import six
 from six.moves.urllib.parse import urlencode 
 from six.moves.urllib import request as url_request
 
+from mixpanel_query.utils import _tobytes
+
 __all__ = ('Connection',)
 
-def _tobytes(val):
-    if isinstance(val, six.binary_type):
-        return val
-    elif isinstance(val, six.text_type):
-        return val.encode('utf-8')
-    else:
-        return six.text_type(val).encode('utf-8')
-        
 class Connection(object):
     """
     The `Connection` object's sole responsibility is to format, send to
