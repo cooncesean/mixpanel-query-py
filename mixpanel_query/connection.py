@@ -5,10 +5,20 @@ requests to the Mixpanel API.
 import hashlib
 import json
 import time
-import urllib
-import urllib2
+import six
+from six.moves.urllib.parse import urlencode 
+from six.moves.urllib import request as url_request
 
+__all__ = ('Connection',)
 
+def _tobytes(val):
+    if isinstance(val, six.binary_type):
+        return val
+    elif isinstance(val, six.text_type):
+        return val.encode('utf-8')
+    else:
+        return six.text_type(val).encode('utf-8')
+        
 class Connection(object):
     """
     The `Connection` object's sole responsibility is to format, send to
@@ -28,11 +38,11 @@ class Connection(object):
         """
         request = self.raw_request(self.ENDPOINT, method_name, params, response_format)
         data = request.read()
-        return json.loads(data)
+        return json.loads(data.decode('utf-8'))
 
     def raw_request(self, base_url, method_name, params, response_format):
         """
-        Make a request to the Mixpanel API and return a raw urllib2 file-like
+        Make a request to the Mixpanel API and return a raw urllib2/url.request file-like
         response object.
         """
         params['api_key'] = self.client.api_key
@@ -52,7 +62,7 @@ class Connection(object):
             method_name=method_name,
             encoded_params=self.unicode_urlencode(params)
         )
-        return urllib2.urlopen(request_url, timeout=120)
+        return url_request.urlopen(request_url, timeout=120)
 
     def unicode_urlencode(self, params):
         """
@@ -60,13 +70,13 @@ class Connection(object):
         unicode URL parameters.
         """
         if isinstance(params, dict):
-            params = params.items()
+            params = list(six.iteritems(params))
         for i, param in enumerate(params):
             if isinstance(param[1], list):
                 params[i] = (param[0], json.dumps(param[1]),)
 
-        return urllib.urlencode(
-            [(k, isinstance(v, unicode) and v.encode('utf-8') or v) for k, v in params]
+        return urlencode(
+            [(_tobytes(k), _tobytes(v)) for k, v in params]
         )
 
     def hash_args(self, args, secret=None):
@@ -78,31 +88,23 @@ class Connection(object):
             if isinstance(args[a], list):
                 args[a] = json.dumps(args[a])
 
-        args_joined = ''
+        args_joined = six.b('')
         for a in sorted(args.keys()):
-            if isinstance(a, unicode):
-                args_joined += a.encode('utf-8')
-            else:
-                args_joined += str(a)
-
-            args_joined += '='
-
-            if isinstance(args[a], unicode):
-                args_joined += args[a].encode('utf-8')
-            else:
-                args_joined += str(args[a])
+            args_joined += _tobytes(a)
+            args_joined += six.b('=')
+            args_joined += _tobytes(args[a])
 
         hash = hashlib.md5(args_joined)
 
         if secret:
-            hash.update(secret)
+            hash.update(_tobytes(secret))
         elif self.client.api_secret:
-            hash.update(self.client.api_secret)
+            hash.update(_tobytes(self.client.api_secret))
         return hash.hexdigest()
 
     def check_params(self, params):
         copyParams = params.copy()
-        for key in copyParams.iterkeys():
+        for key in six.iterkeys(copyParams):
             if not copyParams[key]:
                 del params[key]
 

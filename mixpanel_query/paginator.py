@@ -1,6 +1,8 @@
 import math
 import itertools
 from multiprocessing.pool import ThreadPool
+import six
+from six.moves import range
 
 class ConcurrentPaginator(object):
     """
@@ -38,11 +40,11 @@ class ConcurrentPaginator(object):
 
         start, end = self._remaining_page_range(first_page)
         fetcher = self._results_fetcher(params)
-        return results + self._concurrent_flatmap(fetcher, range(start, end))
+        return results + self._concurrent_flatmap(fetcher, list(range(start, end)))
 
     def _results_fetcher(self, params):
         def _fetcher_func(page):
-            req_params = dict(params.items() + [('page', page)])
+            req_params = dict(list(six.iteritems(params)) + [('page', page)])
             return self.get_func(**req_params)['results']
         return _fetcher_func
 
