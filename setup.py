@@ -9,6 +9,7 @@ setup(
     author_email='cooncesean@gmail.com',
     url='https://www.github.com/cooncesean/mixpanel-query-py',
     packages=find_packages(),
+    install_requires=['six'],
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',

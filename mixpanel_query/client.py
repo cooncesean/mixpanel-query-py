@@ -1,9 +1,10 @@
 import datetime
 import json
+import six
 
 from mixpanel_query import exceptions
 from mixpanel_query.connection import Connection
-
+from mixpanel_query.utils import _totext
 
 class MixpanelQueryClient(object):
     """
@@ -33,8 +34,8 @@ class MixpanelQueryClient(object):
     VALID_DATA_TYPES = (DATA_TYPE_GENERAL, DATA_TYPE_AVERAGE, DATA_TYPE_UNIQUE)
 
     def __init__(self, api_key, api_secret):
-        self.api_key = api_key
-        self.api_secret = api_secret
+        self.api_key = _totext(api_key)
+        self.api_secret = _totext(api_secret)
         self.connection = Connection(self)
 
     # Annotation methods ##############
@@ -885,7 +886,7 @@ class MixpanelQueryClient(object):
             response_format
         )
         for line in response:
-            yield json.loads(line)
+            yield json.loads(_totext(line))
 
     # Util methods ####################
     def _validate_unit(self, unit):
