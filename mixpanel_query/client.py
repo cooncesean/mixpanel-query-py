@@ -1,9 +1,18 @@
 import datetime
 import json
+import six
 
 from mixpanel_query import exceptions
 from mixpanel_query.connection import Connection
 
+
+def _totext(val):
+    if isinstance(val, six.text_type):
+        return val
+    elif isinstance(val, six.binary_type):
+        return val.decode('utf-8')
+    else:
+        return val
 
 class MixpanelQueryClient(object):
     """
@@ -802,7 +811,7 @@ class MixpanelQueryClient(object):
             response_format
         )
         for line in response:
-            yield json.loads(line)
+            yield json.loads(_totext(line))
 
     # Util methods ####################
     def _validate_unit(self, unit):
