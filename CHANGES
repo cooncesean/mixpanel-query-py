@@ -1,3 +1,5 @@
+* 0.1.7
+    * Adds support for customizing the timeout time of the client's connections.
 * 0.1.6
     * Adds support for Python 2 and Python 3; thanks to @robin900 for upgrading the library.
 * 0.1.5

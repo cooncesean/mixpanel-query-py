@@ -21,6 +21,7 @@ class Connection(object):
     ENDPOINT = 'http://mixpanel.com/api'
     DATA_ENDPOINT = 'https://data.mixpanel.com/api'
     VERSION = '2.0'
+    DEFAULT_TIMEOUT = 120
 
     def __init__(self, client):
         self.client = client
@@ -56,7 +57,7 @@ class Connection(object):
             method_name=method_name,
             encoded_params=self.unicode_urlencode(params)
         )
-        return url_request.urlopen(request_url, timeout=120)
+        return url_request.urlopen(request_url, timeout=self.DEFAULT_TIMEOUT if self.client.timeout is None else self.client.timeout)
 
     def unicode_urlencode(self, params):
         """
