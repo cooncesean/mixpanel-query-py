@@ -33,9 +33,10 @@ class MixpanelQueryClient(object):
     DATA_TYPE_UNIQUE = 'unique'
     VALID_DATA_TYPES = (DATA_TYPE_GENERAL, DATA_TYPE_AVERAGE, DATA_TYPE_UNIQUE)
 
-    def __init__(self, api_key, api_secret):
+    def __init__(self, api_key, api_secret, timeout=None):
         self.api_key = _totext(api_key)
         self.api_secret = _totext(api_secret)
+        self.timeout = timeout
         self.connection = Connection(self)
 
     # Annotation methods ##############
