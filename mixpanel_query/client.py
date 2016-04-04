@@ -886,8 +886,12 @@ class MixpanelQueryClient(object):
             },
             response_format
         )
+        response_data = response.read()
+
+        
         for line in response:
-            yield json.loads(_totext(line))
+            if line:
+                yield json.loads(_totext(line))
 
     # Util methods ####################
     def _validate_unit(self, unit):
