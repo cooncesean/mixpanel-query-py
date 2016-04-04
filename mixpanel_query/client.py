@@ -873,7 +873,7 @@ class MixpanelQueryClient(object):
 
         # the provided event should be an array even when a singleton
         # if a singleton string/unicode is provided, put it into an array
-        if event is not None and not isinstance(event, list):
+        if isinstance(event, six.string_types):
             event = [event]
 
         response = self.connection.raw_request(
