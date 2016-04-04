@@ -871,7 +871,9 @@ class MixpanelQueryClient(object):
         if start_date_obj > end_date_obj:
             raise exceptions.InvalidDateException('The `start_date` specified after the `end_date`; you will not receive any events.')
 
-        if isinstance(event, str):
+        # the provided event should be an array even when a singleton
+        # if a singleton string/unicode is provided, put it into an array
+        if isinstance(event, six.string_types):
             event = [event]
 
         response = self.connection.raw_request(
