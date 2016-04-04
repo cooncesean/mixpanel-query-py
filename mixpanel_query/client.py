@@ -888,8 +888,18 @@ class MixpanelQueryClient(object):
             },
             response_format
         )
-        for line in response:
-            yield json.loads(_totext(line))
+        # per mixpanel documentation it is necessary to load
+        # the response in it's entirety before processing:
+        #     > This endpoint uses gzip to compress the transfer;
+        #     > as a result, raw exports should not be processed until
+        #     > the file is received in its entirety.
+        # https://mixpanel.com/docs/api-documentation/exporting-raw-data-you-inserted-into-mixpanel
+        response_data = response.read()
+        lines = _totext(response_data).split('\n')
+        
+        for line in lines:
+            if line:
+                yield json.loads(line)
 
     # Util methods ####################
     def _validate_unit(self, unit):
