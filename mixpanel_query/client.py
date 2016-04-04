@@ -888,6 +888,12 @@ class MixpanelQueryClient(object):
             },
             response_format
         )
+        # per mixpanel documentation it is necessary to load
+        # the response in it's entirety before processing:
+        #     > This endpoint uses gzip to compress the transfer;
+        #     > as a result, raw exports should not be processed until
+        #     > the file is received in its entirety.
+        # https://mixpanel.com/docs/api-documentation/exporting-raw-data-you-inserted-into-mixpanel
         response_data = response.read()
         lines = response_data.split('\n')
         
