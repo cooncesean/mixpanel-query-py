@@ -887,9 +887,9 @@ class MixpanelQueryClient(object):
             response_format
         )
         response_data = response.read()
-
+        lines = response_data.split('\n')
         
-        for line in response_data:
+        for line in lines:
             if line:
                 yield json.loads(_totext(line))
 
