@@ -895,11 +895,11 @@ class MixpanelQueryClient(object):
         #     > the file is received in its entirety.
         # https://mixpanel.com/docs/api-documentation/exporting-raw-data-you-inserted-into-mixpanel
         response_data = response.read()
-        lines = response_data.split('\n')
+        lines = _totext(response_data).split('\n')
         
         for line in lines:
             if line:
-                yield json.loads(_totext(line))
+                yield json.loads(line)
 
     # Util methods ####################
     def _validate_unit(self, unit):
