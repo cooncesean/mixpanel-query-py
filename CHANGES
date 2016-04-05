@@ -1,3 +1,5 @@
+* 0.1.8
+    * Updates 'get_export' functionality to bring it inline with mixpanel's current API
 * 0.1.7
     * Adds support for customizing the timeout time of the client's connections.
 * 0.1.6
