@@ -7,7 +7,6 @@ import json
 import time
 import base64
 import six
-from six.moves.urllib.parse import urlencode
 from six.moves.urllib import request as url_request
 
 from mixpanel_query.utils import _unicode_urlencode, _totext, _tobytes
