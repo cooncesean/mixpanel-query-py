@@ -5,6 +5,8 @@ import six
 from mixpanel_query import exceptions
 from mixpanel_query.connection import Connection
 from mixpanel_query.utils import _totext
+from mixpanel_query.auth import SignatureAuth
+
 
 class MixpanelQueryClient(object):
     """
@@ -33,11 +35,12 @@ class MixpanelQueryClient(object):
     DATA_TYPE_UNIQUE = 'unique'
     VALID_DATA_TYPES = (DATA_TYPE_GENERAL, DATA_TYPE_AVERAGE, DATA_TYPE_UNIQUE)
 
-    def __init__(self, api_key, api_secret, timeout=None):
+    def __init__(self, api_key, api_secret, auth_class=SignatureAuth, timeout=None):
         self.api_key = _totext(api_key)
         self.api_secret = _totext(api_secret)
         self.timeout = timeout
         self.connection = Connection(self)
+        self.auth = auth_class(self)
 
     # Annotation methods ##############
     def annotations_list(self, start_date, end_date, response_format=FORMAT_JSON):

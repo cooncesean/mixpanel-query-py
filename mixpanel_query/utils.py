@@ -1,4 +1,5 @@
 import six
+from six.moves.urllib.parse import urlencode
 
 def _totext(val):
     """
@@ -27,3 +28,18 @@ def _tobytes(val):
         return val.encode('utf-8')
     else:
         return six.text_type(val).encode('utf-8')
+
+def _unicode_urlencode(params):
+    """
+    Convert lists to JSON encoded strings, and correctly handle any
+    unicode URL parameters.
+    """
+    if isinstance(params, dict):
+        params = list(six.iteritems(params))
+    for i, param in enumerate(params):
+        if isinstance(param[1], list):
+            params[i] = (param[0], json.dumps(param[1]),)
+
+    return urlencode(
+        [(_tobytes(k), _tobytes(v)) for k, v in params]
+    )
