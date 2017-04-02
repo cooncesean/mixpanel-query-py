@@ -3,7 +3,9 @@ The class(es) in this module contain logic to make http
 requests to the Mixpanel API.
 """
 import json
+
 import six
+
 from six.moves.urllib import request as url_request
 
 __all__ = ('Connection',)

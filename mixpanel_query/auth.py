@@ -2,14 +2,15 @@
 The classes in this module contain the logic to authenticate an http request to
 the Mixpanel API
 """
+import base64
 import hashlib
 import json
 import time
-import base64
-import six
-from six.moves.urllib import request as url_request
 
-from mixpanel_query.utils import _unicode_urlencode, _totext, _tobytes
+import six
+from mixpanel_query.utils import _tobytes, _totext, _unicode_urlencode
+
+from six.moves.urllib import request as url_request
 
 
 class SignatureAuth(object):
@@ -33,15 +34,13 @@ class SignatureAuth(object):
         Hashes arguments by joining key=value pairs, appending the api_secret, and
         then taking the MD5 hex digest.
         """
-        for a in args:
-            if isinstance(args[a], list):
-                args[a] = json.dumps(args[a])
+        for arg in args:
+            if isinstance(args[arg], list):
+                args[arg] = json.dumps(args[arg])
 
-        args_joined = six.b('')
-        for a in sorted(args.keys()):
-            args_joined += _tobytes(a)
-            args_joined += six.b('=')
-            args_joined += _tobytes(args[a])
+        arg_strings = ["{}={}".format(arg, args[arg]) for arg in sorted(args.keys())]
+        args_joined_string = ''.join(arg_strings)
+        args_joined = _tobytes(args_joined_string)
 
         hash = hashlib.md5(args_joined)
 
