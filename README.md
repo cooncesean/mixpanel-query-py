@@ -55,6 +55,20 @@ print data
 }
 ```
 
+By default the `MixpanelQueryClient` will use signature-based authentication when issuing requests to Mixpanel. If you would like to use the secret-based authentication method, you can do so like this:
+
+```python
+from mixpanel_query.client import MixpanelQueryClient
+from mixpanel_query.auth import SecretAuth, SignatureAuth
+from your_project.conf import MIXPANEL_API_KEY, MIXPANEL_API_SECRET
+
+# Instantiate a secret-based auth client
+secret_auth_client = MixpanelQueryClient(MIXPANEL_API_KEY, MIXPANEL_API_SECRET, auth_class=SecretAuth)
+
+# Instantiate a signature-based auth client explicitly
+sig_auth_client = MixpanelQueryClient(MIXPANEL_API_KEY, MIXPANEL_API_SECRET, auth_class=SignatureAuth)
+```
+
 View the [api reference](#api-reference) for details on accessing different endpoints.
 
 # API Reference
