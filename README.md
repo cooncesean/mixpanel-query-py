@@ -66,7 +66,7 @@ from your_project.conf import MIXPANEL_API_KEY, MIXPANEL_API_SECRET
 secret_auth_client = MixpanelQueryClient(MIXPANEL_API_KEY, MIXPANEL_API_SECRET, auth_class=SecretAuth)
 
 # Instantiate a signature-based auth client explicitly
-sig_auth_client = MixpanelQueryClient(MIXPANEL_API_KEY, MIXPANEL_API_SECRET, auth_class=SigAuth)
+sig_auth_client = MixpanelQueryClient(MIXPANEL_API_KEY, MIXPANEL_API_SECRET, auth_class=SignatureAuth)
 ```
 
 View the [api reference](#api-reference) for details on accessing different endpoints.
