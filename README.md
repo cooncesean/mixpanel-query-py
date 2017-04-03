@@ -55,6 +55,7 @@ print data
 }
 ```
 
+### Authentication
 By default the `MixpanelQueryClient` will use signature-based authentication when issuing requests to Mixpanel. If you would like to use the secret-based authentication method, you can do so like this:
 
 ```python
